@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>记账本</title>
+    <!-- 引入Bootstrap样式库 -->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>记账本</h1>
+        <form>
+            <div class="form-group">
+                <label for="type">类型</label>
+                <select class="form-control" id="type">
+                    <option value="支出">支出</option>
+                    <option value="收入">收入</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="amount">金额</label>
+                <input type="number" class="form-control" id="amount">
+            </div>
+            <div class="form-group">
+                <label for="date">日期</label>
+                <input type="date" class="form-control" id="date">
+            </div>
+            <div class="form-group">
+                <label for="category">类别</label>
+                <select class="form-control" id="category">
+                    <option value="餐饮">餐饮</option>
+                    <option value="购物">购物</option>
+                    <option value="交通">交通</option>
+                    <option value="娱乐">娱乐</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="note">备注</label>
+                <input type="text" class="form-control" id="note">
+            </div>
+            <button type="button" class="btn btn-primary" id="add-btn">添加</button>
+        </form>
+        <table class="table mt-3">
+            <thead>
+                <tr>
+                    <th>类型</th>
+                    <th>金额</th>
+                    <th>日期</th>
+                    <th>类别</th>
+                    <th>备注</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5" id="total-amount">总金额：</td>
+                    <!-- <td id="total-amount"></td> -->
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- 引入jQuery库 -->
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <!-- 引入Bootstrap库 -->
+    <script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script>
+        // 从localStorage中读取数据，如果不存在则返回空数组
+        var data = JSON.parse(localStorage.getItem('data')) || [];
+
+        // 将数据渲染到页面上
+        function render() {
+            var html = '';
+            var totalAmount = 0;
+            for (var i = 0; i < data.length; i++) {
+                html += '<tr>';
+                html += '<td>' + data[i].type + '</td>';
+                html += '<td>' + data[i].amount + '</td>';
+                html += '<td>' + data[i].date + '</td>';
+                html += '<td>' + data[i].category + '</td>';
+                html += '<td>' + data[i].note + '</td>';
+                html += '<td><button type="button" class="btn btn-danger delete-btn" data-index="' + i + '">删除</button></td>';
+                html += '</tr>';
+                if (data[i].type === '支出') {
+                    totalAmount -= parseInt(data[i].amount);
+                } else {
+                    totalAmount += parseInt(data[i].amount);
+                }
+            }
+            $('#tbody').html(html);
+            $('#total-amount').text('总金额：' + totalAmount);
+        }
+
+        // 添加账目
+        $('#add-btn').click(function () {
+            var type = $('#type').val();
+            var amount = $('#amount').val();
+            var date = $('#date').val();
+            var category = $('#category').val();
+            var note = $('#note').val();
+            if (type && amount && date && category) {
+                data.push({
+                    type: type,
+                    amount: amount,
+                    date: date,
+                    category: category,
+                    note: note
+                });
+                localStorage.setItem('data', JSON.stringify(data));
+                render();
+            } else {
+                alert('请填写完整信息');
+            }
+        });
+
+        // 删除账目
+        $(document).on('click', '.delete-btn', function () {
+            var index = $(this).data('index');
+            data.splice(index, 1);
+            localStorage.setItem('data', JSON.stringify(data));
+            render();
+        });
+
+        // 页面加载完成后渲染数据
+        render();
+    </script>
+</body>
+
+</html>
